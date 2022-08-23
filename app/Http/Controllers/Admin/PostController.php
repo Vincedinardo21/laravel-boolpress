@@ -1,87 +1,124 @@
 <?php
-
-namespace App\Http\Controllers\Admin;
-
-use App\Models\Tag;
+namespace App\Http\Controllers\Api;
 use App\Models\Post;
-use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 
 class PostController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     // Display a listing of the resource.
-    public function index()
+    public function index(Request $request)
     {
-        $perPage = 20;
-        $posts = Post::paginate($perPage);
+        $per_page = $request->query('per_page', 10);
+        $per_page_default = 10;
+        $per_page = $request->query('per_page', $per_page_default);
+        if ($per_page < 1 || $per_page > 100) {
+            return response()->json(['success' => false], 400);
+            $per_page = $per_page_default;
+            // return response()->json(['success' => false], 400);
+        }
 
-        return view('admin.posts.index', compact('posts'));
+        $posts = Post::with('user')->with('category')->with('tags')->paginate($per_page);
+        $posts = Post::with(['user', 'category', 'tags'])->paginate($per_page);
+
+        return response()->json([
+            'success'   => true,
+            'response'  => $posts
+        ]);
     }
 
-    // Show the form for creating a new resource.
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function create()
-    {
-        $categories = Category::all();
-        $tags = Tag::all();
-
-        return view('admin.posts.create', [
-            'categories'    => $categories,
-            'tags'          => $tags,
-        ]);
-    }
-
-    // Store a newly created resource in storage.
-    public function store(Request $request)
-    {
-        // validation
-        $request->validate([
-            'title'     => 'required|string|max:100',
-            'slug'      => 'required|string|max:100|unique:posts',
-            'category_id'  => 'required|integer|exists:categories,id',
-            'tags'      => 'nullable|array',
-            'tags.*'    => 'integer|exists:tags,id',
-            'image'     => 'required_without:content|nullable|url',
-            'content'   => 'required_without:image|nullable|string|max:5000',
-            'excerpt'   => 'nullable|string|max:200',
-        ]);
-
-        $data = $request->all();
-        dump($data);
-
-        // salvataggio
-        $post = Post::create($data);
-        $post->tags()->sync($data['tags']);
-
-        return redirect()->route('admin.posts.show', ['post' => $post->id]);
-        // redirect
-    }
-
-    // Display the specified resource.
-    public function show(Post $post)
-    {
-        return view('admin.posts.show', compact('post'));
-    }
-
-    // Show the form for editing the specified resource.
-    public function edit(Post $post)
-    {
-        return view('admin.posts.edit', compact('post'));
-    }
-
-    // Update the specified resource in storage.
-    public function update(Request $request, Post $post)
     {
         //
     }
 
-    // Remove the specified resource from storage.
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+    // Restituisce 9 post random per la homepage in Vue
+    public function random() {
+        $sql = Post::with(['user', 'category', 'tags'])->limit(9)->inRandomOrder();
+        $posts = $sql->get();
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Post  $post
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Post $post)
+    {
+        //
+        return response()->json([
+            // 'sql'       => $sql->toSql(), // solo per debugging
+            'success'   => true,
+            'result'    => $posts,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Post  $post
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Post $post)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Post  $post
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Post $post)
+    // Display the specified resource.
+    public function show($slug)
+    {
+        //
+        $post = Post::with(['user', 'category', 'tags'])->where('slug', $slug)->first();
+
+        if ($post) {
+            return response()->json([
+                'success'   => true,
+                'result'    => $post
+            ]);
+        } else {
+            return response()->json([
+                'success'   => false,
+            ]);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Post  $post
+     * @return \Illuminate\Http\Response
+     */
     public function destroy(Post $post)
     {
-        if(Auth::id() != $post->user_id) abort(401);
-
-        $post->tags()->detach();
-        $post->delete();
-        return redirect()->route('admin.posts.index')->with('deleted', 'Il post {{ $post->title }} è stato eliminato');
+        //
     }
 }
