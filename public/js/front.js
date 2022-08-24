@@ -5654,14 +5654,33 @@ var staticRenderFns = [function () {
     attrs: {
       "for": "email"
     }
-  }, [_vm._v("Message")]), _vm._v(" "), _c("input", {
+  }, [_vm._v("Message")]), _vm._v(" "), _c("textarea", {
     staticClass: "form-control",
     attrs: {
-      type: "text",
       name: "message",
-      id: "message"
+      id: "message",
+      cols: "30",
+      rows: "10"
     }
-  })])])]);
+  })]), _vm._v(" "), _c("div", [_c("input", {
+    staticClass: "form-check-input",
+    attrs: {
+      type: "checkbox",
+      name: "newsletter",
+      id: "newsletter",
+      checked: ""
+    }
+  }), _vm._v(" "), _c("label", {
+    staticClass: "form-check-label",
+    attrs: {
+      "for": "newsletter"
+    }
+  }, [_vm._v("Iscrivimi alla newsletter")])]), _vm._v(" "), _c("button", {
+    staticClass: "btn btn-primary",
+    attrs: {
+      type: "submit"
+    }
+  }, [_vm._v("Send")])])]);
 }];
 render._withStripped = true;
 

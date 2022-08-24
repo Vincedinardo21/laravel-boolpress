@@ -14,8 +14,15 @@
 
        <div class="mb-3">
           <label class="form-label" for="email">Message</label>
-          <input class="form-control" type="text" name="message" id="message">
+          <textarea class="form-control" name="message" id="message" cols="30" rows="10"></textarea>
        </div>
+
+       <div>
+          <input class="form-check-input" type="checkbox" name="newsletter" id="newsletter" checked>
+          <label class="form-check-label" for="newsletter">Iscrivimi alla newsletter</label>
+       </div>
+
+       <button type="submit" class="btn btn-primary">Send</button>
     </form>
   </div>
 </template>
