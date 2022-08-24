@@ -1,124 +1,172 @@
 <?php
-namespace App\Http\Controllers\Api;
+
+namespace App\Http\Controllers\Admin;
+
+use App\Models\Tag;
 use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    protected $validation_rules = [
+        'title'         => 'required|string|max:100',
+        'slug'          => [
+            'required',
+            'string',
+            'max:100',
+        ],
+        'category_id'   => 'required|integer|exists:categories,id',
+        'tags'          => 'nullable|array',
+        'tags.*'        => 'integer|exists:tags,id',
+        // 'image'         => 'required_without:content|nullable|url',
+        'image'         => 'required_without:content|nullable|file|image|max:1024', // dimensione max in kilobytes
+        'content'       => 'required_without:image|nullable|string|max:5000',
+        'excerpt'       => 'nullable|string|max:200',
+    ];
+
+    protected $perPage = 20;
+
+
     // Display a listing of the resource.
-    public function index(Request $request)
+    public function index()
     {
-        $per_page = $request->query('per_page', 10);
-        $per_page_default = 10;
-        $per_page = $request->query('per_page', $per_page_default);
-        if ($per_page < 1 || $per_page > 100) {
-            return response()->json(['success' => false], 400);
-            $per_page = $per_page_default;
-            // return response()->json(['success' => false], 400);
-        }
-
-        $posts = Post::with('user')->with('category')->with('tags')->paginate($per_page);
-        $posts = Post::with(['user', 'category', 'tags'])->paginate($per_page);
-
-        return response()->json([
-            'success'   => true,
-            'response'  => $posts
-        ]);
+        $posts = Post::paginate($this->perPage);
+        return view('admin.posts.index', compact('posts'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+    public function myIndex() {
+        $posts = Auth::user()->posts()->paginate($this->perPage);
+        return view('admin.posts.index', compact('posts'));
+    }
+
+
+    // Show the form for creating a new resource.
     public function create()
     {
-        //
-    }
+        $categories = Category::all();
+        $tags = Tag::all();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-    // Restituisce 9 post random per la homepage in Vue
-    public function random() {
-        $sql = Post::with(['user', 'category', 'tags'])->limit(9)->inRandomOrder();
-        $posts = $sql->get();
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Post $post)
-    {
-        //
-        return response()->json([
-            // 'sql'       => $sql->toSql(), // solo per debugging
-            'success'   => true,
-            'result'    => $posts,
+        return view('admin.posts.create', [
+            'categories'    => $categories,
+            'tags'          => $tags,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
+
+    // Store a newly created resource in storage.
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        // validation
+        $this->validation_rules['slug'][] = 'unique:posts';
+        $request->validate($this->validation_rules);
+
+        $data = $request->all();
+
+        if (key_exists('image', $data)) {
+            // salvare l'immagine in public
+            $img_path = Storage::put('uploads', $data['image']);
+
+            // aggiornare il valore della chiave image con il nome dell'immagine appena creata
+            $data['image'] = $img_path;
+        }
+
+        $data = $data + [
+            'user_id'       => Auth::id(),
+        ];
+        // dump($data);
+        // dump(Auth::user());
+
+        // salvataggio
+        $post = Post::create($data);
+        $post->tags()->sync($data['tags']);
+
+        return redirect()->route('admin.posts.show', ['post' => $post]);
+        // redirect
+    }
+
+
+    // Display the specified resource.
+    public function show(Post $post)
+    {
+        return view('admin.posts.show', compact('post'));
+    }
+
+
+    // Show the form for editing the specified resource.
     public function edit(Post $post)
     {
-        //
+        if (Auth::id() != $post->user_id) abort(401);
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('admin.posts.edit', [
+            'post'          => $post,
+            'categories'    => $categories,
+            'tags'          => $tags,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
+
+    // Update the specified resource in storage.
     public function update(Request $request, Post $post)
-    // Display the specified resource.
-    public function show($slug)
     {
-        //
-        $post = Post::with(['user', 'category', 'tags'])->where('slug', $slug)->first();
+        if (Auth::id() != $post->user_id) abort(401);
 
-        if ($post) {
-            return response()->json([
-                'success'   => true,
-                'result'    => $post
-            ]);
-        } else {
-            return response()->json([
-                'success'   => false,
-            ]);
+        // validation
+        $this->validation_rules['slug'][] = Rule::unique('posts')->ignore($post->id);
+        $request->validate($this->validation_rules);
+        $data = $request->all();
+
+        if (key_exists('image', $data)) {
+            // eliminare il file precedente se esiste
+            if ($post->image) {
+                Storage::delete($post->image);
+            }
+
+            // caricare il nuovo file
+            $img_path = Storage::put('uploads', $data['image']);
+
+            // aggiornare l'array $data con il percorso del file appena creato
+            $data['image'] = $img_path;
         }
+
+        // aggiornare nel database
+        $post->update($data);
+        $post->tags()->sync($data['tags']);
+
+        // redirect
+        return redirect()->route('admin.posts.show', ['post' => $post]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
+
+    // Remove the specified resource from storage.
     public function destroy(Post $post)
     {
-        //
+        if (Auth::id() != $post->user_id) abort(401);
+
+        // TODO: inplement soft deleting
+        // $post->tags()->sync([]); // equivalente a detach()
+        $post->tags()->detach();
+        $post->delete();
+
+        return redirect()->route('admin.posts.index')->with('deleted', "Il post <strong>{$post->title}</strong> è stato eliminato");
+    }
+
+    public function getSlug(Request $request) {
+        // /admin/getslug?title=Questo è il titolo
+        $title = $request->query('title');
+        $slug = Post::getSlug($title);
+
+        return response()->json([
+            'success'   => true,
+            'response'  => $slug
+        ]);
     }
 }

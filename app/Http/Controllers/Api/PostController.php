@@ -2,91 +2,74 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    private function fixImageUrl($imgPath) {
+        return $imgPath ? asset('/storage/' . $imgPath) : null;
+    }
+
+    // Display a listing of the resource.
     public function index(Request $request)
     {
-        $per_page = $request->query('per_page', 2);
+        $per_page_default = 10;
+        $per_page = $request->query('per_page', $per_page_default);
+        if ($per_page < 1 || $per_page > 100) {
+            $per_page = $per_page_default;
+            // return response()->json(['success' => false], 400);
+        }
 
-        if($per_page < 1 || $per_page > 5)
-            return response()->status(400)->json(['success' => false]);
+        $posts = Post::with(['user', 'category', 'tags'])->paginate($per_page);
 
-        $posts = Post::paginate($per_page);
-        return response()->json($posts);
+        foreach ($posts as $post) {
+            $post->image = $this->fixImageUrl($post->image);
+        }
+
+        return response()->json([
+            'success'   => true,
+            'response'  => $posts
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+
+    // Restituisce 9 post random per la homepage in Vue
+    public function random() {
+        $sql = Post::with(['user', 'category', 'tags'])->whereNotNull('image')->limit(9)->inRandomOrder();
+        $posts = $sql->get();
+
+        foreach ($posts as $post) {
+            $post->image = $this->fixImageUrl($post->image);
+        }
+
+        return response()->json([
+            // 'sql'       => $sql->toSql(), // solo per debugging
+            'success'   => true,
+            'result'    => $posts,
+        ]);
+    }
+
+
+    // Display the specified resource.
+    public function show($slug)
     {
-        //
+        $post = Post::with(['user', 'category', 'tags'])->where('slug', $slug)->first();
+
+        if ($post) {
+            // $post->image = $post->image ? '/storage/' . $post->image : null;
+            $post->image = $this->fixImageUrl($post->image);
+            return response()->json([
+                'success'   => true,
+                'result'    => $post
+            ]);
+        } else {
+            return response()->json([
+                'success'   => false,
+            ]);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Post $post)
-    {
-        //
-    }
 }

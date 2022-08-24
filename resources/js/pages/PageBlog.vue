@@ -1,20 +1,9 @@
 <template>
-    <div class="container">
+    <div>
         <h1 class="text-center">Boolpress</h1>
         <div class="row g-2">
-            <div v-for="post in posts" :key="post.id" class="col-sm-6 col-md-4">
-                <div class="card h-100">
-                    <img :src="post.image" class="card-img-top" :alt="post.title">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ post.title }}</h5>
-                        <p class="card-text mb-auto">{{ post.excerpt }}</p>
-                        <a :href="baseUrl + '/posts/' + post.slug" class="btn btn-primary">Go somewhere</a>
-                    </div>
-                </div>
-            </div>
             <CardPost v-for="post in posts" :key="post.id" :post="post" />
         </div>
-
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center">
                 <li class="page-item">
@@ -37,8 +26,8 @@
 
 <script>
 import CardPost from '../components/CardPost.vue';
+
 export default {
-    name: 'App',
     name: 'PageBlog',
     components: {
         CardPost,
@@ -50,7 +39,6 @@ export default {
         }
     },
     created() {
-        axios.get('http://localhost:8000/api/posts')
         axios.get('/api/posts')
             .then(res => {
                 this.posts = res.data.response.data;
@@ -60,6 +48,7 @@ export default {
     }
 }
 </script>
+
 <style lang="scss" scoped>
     @import 'bootstrap/scss/bootstrap';
 </style>

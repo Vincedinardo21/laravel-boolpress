@@ -10522,14 +10522,10 @@ process.umask = function() { return 0; };
 /*!******************************!*\
   !*** ./resources/js/back.js ***!
   \******************************/
-/*! no exports provided */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
-
 
 var eleOverlay = document.querySelector('.overlay');
 
@@ -10547,6 +10543,36 @@ if (eleOverlay) {
   });
   document.querySelector('.js-no').addEventListener('click', function () {
     eleOverlay.classList.add('d-none');
+  });
+}
+
+var inputTitle = document.getElementById('title');
+
+if (inputTitle) {
+  inputSlug = document.getElementById('slug');
+  inputTitle.addEventListener('focusout', function () {
+    if (!inputSlug.value) {
+      axios('/admin/getslug?title=' + inputTitle.value).then(function (res) {
+        return inputSlug.value = res.data.response;
+      });
+    }
+  });
+}
+
+var inputImage = document.getElementById('image');
+
+if (inputImage) {
+  var elePreview = document.getElementById('preview');
+  inputImage.addEventListener('change', function (event) {
+    var imgPath = event.target.files[0];
+    var reader = new FileReader();
+    reader.addEventListener('load', function () {
+      elePreview.src = reader.result;
+    });
+
+    if (imgPath) {
+      reader.readAsDataURL(imgPath);
+    }
   });
 }
 
@@ -10581,7 +10607,7 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\MAMP\htdocs\laravel-api\resources\js\back.js */"./resources/js/back.js");
+module.exports = __webpack_require__(/*! C:\Users\huser\Desktop\boolean\classe64\laravel\classe64-30-boolpress\resources\js\back.js */"./resources/js/back.js");
 
 
 /***/ })

@@ -9,13 +9,14 @@
                 {{ tag.name }}
             </span>
         </div>
-        <img :src="post.image" :alt="post.title">
+        <img v-if="post.image" :src="post.image" :alt="post.title">
         <p>{{ post.content }}</p>
     </div>
 </template>
 
 <script>
 import Page404 from './Page404.vue';
+
 export default {
     name: 'PageShow',
     components: {
@@ -44,4 +45,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 </style>

@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('guests.home');
-})->name('home');
+// Route::get('/', function () {
+//     return view('guests.home');
+// })->name('home');
 
 Auth::routes();
 
@@ -29,7 +29,14 @@ Route::middleware('auth')
    ->prefix('admin')
    ->group(function () {
         Route::get('/', 'AdminController@dashboard')->name('dashboard');
-        Route::resource('posts', 'PostController');
         Route::get('users', 'UserController@index')->name('users.index');
         Route::resource('categories', 'CategoryController');
+        Route::resource('posts', 'PostController');
+        Route::get('getslug', 'PostController@getSlug')->name('posts.getSlug');
+        Route::get('my-posts', 'PostController@myIndex')->name('posts.myIndex');
+        Route::resource('tags', 'TagController');
    });
+
+Route::get("{any?}", function() {
+    return view("guests.home");
+})->where("any", ".*")->name('home');

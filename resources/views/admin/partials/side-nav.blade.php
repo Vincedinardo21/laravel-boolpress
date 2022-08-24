@@ -14,6 +14,9 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a  class="nav-link" href="{{ route('admin.posts.myIndex') }}">My Posts</a>
+            </li>
+            <li class="nav-item">
                 <a  class="nav-link" href="{{ route('admin.posts.create') }}">New Post</a>
             </li>
             <li class="nav-item">

@@ -18,4 +18,6 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::get('/posts', 'Api\PostController@index')->name('api.post.index');
+Route::get('/posts', 'Api\PostController@index')->name('api.posts.index');
+Route::get('/posts/random', 'Api\PostController@random')->name('api.posts.rabdom');
+Route::get('/posts/{post}', 'Api\PostController@show')->name('api.posts.show');
