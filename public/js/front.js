@@ -5619,7 +5619,21 @@ var staticRenderFns = [function () {
   var _vm = this,
       _c = _vm._self._c;
 
-  return _c("div", [_c("h1", [_vm._v("Contact us")]), _vm._v(" "), _c("p", [_vm._v("Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptate, libero aperiam obcaecati cumque sequi aut maiores expedita ")]), _c("p", [_vm._v("Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis incidunt ullam accusantium inventore fuga. Minima accusamus exercitationem deserunt veniam sit nemo fuga dolorum animi aliquam, soluta, accusantium nulla, voluptas reprehenderit?\n  Maxime sed officia a fugit? Culpa voluptatum distinctio quas saepe, accusantium minus, hic rem consequatur illum optio autem omnis quod itaque at, natus pariatur aliquid alias obcaecati? Est, magnam fuga?\n  Excepturi eum quaerat totam praesentium alias, reiciendis voluptate fugit enim in minus aperiam velit amet ab nam dicta delectus quis unde ex quia eveniet consectetur recusandae illum. Odit, aliquid quisquam.\n  Aperiam voluptatibus officiis optio. Dolore eveniet qui tenetur sint. Nesciunt repellendus alias ab iure saepe nobis, a dolor at. Perferendis optio numquam est tenetur. Accusamus, sunt nisi? Ex, non iusto?\n  Facilis asperiores saepe labore, sunt tempora nemo temporibus nostrum tempore libero molestiae, non impedit aliquam eum recusandae ex? Dolor debitis enim molestiae officiis hic quod ipsa fuga corporis non in.")])]);
+  return _c("div", [_c("h1", [_vm._v("Contact us")]), _vm._v(" "), _c("form", [_c("div", {
+    staticClass: "mb-3"
+  }, [_c("label", {
+    staticClass: "form-label",
+    attrs: {
+      "for": "name"
+    }
+  }, [_vm._v("Name")]), _vm._v(" "), _c("input", {
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      name: "name",
+      id: "name"
+    }
+  })])])]);
 }];
 render._withStripped = true;
 
@@ -27915,8 +27929,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\huser\Desktop\boolean\classe64\laravel\classe64-30-boolpress\resources\js\front.js */"./resources/js/front.js");
-module.exports = __webpack_require__(/*! C:\Users\huser\Desktop\boolean\classe64\laravel\classe64-30-boolpress\resources\sass\back.scss */"./resources/sass/back.scss");
+__webpack_require__(/*! C:\MAMP\htdocs\laravel-boolpress\resources\js\front.js */"./resources/js/front.js");
+module.exports = __webpack_require__(/*! C:\MAMP\htdocs\laravel-boolpress\resources\sass\back.scss */"./resources/sass/back.scss");
 
 
 /***/ })
